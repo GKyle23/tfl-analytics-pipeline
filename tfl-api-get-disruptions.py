@@ -31,9 +31,10 @@ def upload_to_gcs(data):
     )
 
 
-def main():
+def main(request=None):
     raw_data = fetch_tfl_data()
     upload_to_gcs(raw_data)
+    return "TFL Disruptions data fetched and uploaded to GCS."
 
 if __name__ == "__main__":
     main()
