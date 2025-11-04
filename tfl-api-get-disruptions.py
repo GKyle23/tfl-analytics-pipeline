@@ -5,7 +5,7 @@ import requests
 from google.cloud import storage
 
 APP_KEY= os.getenv("TFL_APP_KEY")
-BUCKET_NAME= os.getenv("BUCKET_NAME")
+BUCKET_NAME= os.getenv("TFL_BUCKET_NAME")
 MODES = "tube,dlr,overground,elizabeth-line,tram,bus"
 
 def fetch_tfl_data():
@@ -14,7 +14,6 @@ def fetch_tfl_data():
     headers = {"Cache-Control": "no-cache"}
     resp = requests.get(url, params=params, headers=headers)
     resp.raise_for_status() # raises Python exception if response is not 2xx status
-    print("Status:", resp.status_code)
     data = resp.json()
     print(resp.json())
     return data
@@ -38,5 +37,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
