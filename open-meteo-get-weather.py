@@ -37,9 +37,10 @@ def upload_to_gcs(data):
     )
 
 
-def main():
+def main(request=None):
     raw_data = fetch_weather_data()
     upload_to_gcs(raw_data)
+    return 'Weather data uploaded'
 
 if __name__ == "__main__":
     main()
