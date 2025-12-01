@@ -19,7 +19,8 @@ def fetch_tfl_data():
     return data
     
 
-def upload_to_gcs(data,client):
+def upload_to_gcs(data):
+    client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
     timestamp = dt.datetime.now().strftime("%Y/%m/%d/%H")
     blob_name = f"tfl_disruptions/{timestamp}/tfl_disruptions.json"
