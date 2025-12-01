@@ -19,16 +19,17 @@ def fetch_tfl_data():
     return data
     
 
-def upload_to_gcs(data):
-    client = storage.Client()
+def upload_to_gcs(data,client):
     bucket = client.bucket(BUCKET_NAME)
-    timestamp = dt.datetime.now(tz=dt.timezone.utc).strftime("%Y/%m/%d/%H")
+    timestamp = dt.datetime.now().strftime("%Y/%m/%d/%H")
     blob_name = f"tfl_disruptions/{timestamp}/tfl_disruptions.json"
     blob = bucket.blob(blob_name)
+    # upload as ndjson
     blob.upload_from_string(
-        json.dumps(data, indent=2),
-        content_type="application/json"
+        "\n".join(json.dumps(record) for record in data), # use generator expression to save memory
+        content_type="application/x-ndjson"
     )
+    print(f"uploaded to gs bucket {BUCKET_NAME}/{blob_name}")
 
 
 def main(request=None):
