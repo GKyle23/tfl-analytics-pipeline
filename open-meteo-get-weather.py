@@ -32,8 +32,8 @@ def upload_to_gcs(data):
     blob_name = f"weather_forecast_data/{timestamp}/weather_data.json"
     blob = bucket.blob(blob_name)
     blob.upload_from_string(
-    json.dumps(data, indent=2),
-    content_type="application/json"
+        json.dumps(data, indent=2),
+        content_type="application/json"
 )
 
 
