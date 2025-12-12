@@ -33,21 +33,27 @@ def clean_data(records):
 
 
 def upload_to_gcs(cleaned_records):
-    client = storage.Client()
-    bucket = client.bucket(BUCKET_NAME)
-    timestamp = dt.datetime.now().strftime("%Y/%m/%d/%H")
-    blob_name = f"tfl_disruptions/{timestamp}/tfl_disruptions.json"
-    blob = bucket.blob(blob_name)
+    print(">>> ENTERED UPLOAD", flush=True)
+    try:
+        client = storage.Client()
+        bucket = client.bucket(BUCKET_NAME)
 
-    # Convert list → NDJSON
-    ndjson_string = "\n".join(json.dumps(r) for r in cleaned_records)
+        timestamp = dt.datetime.now().strftime("%Y/%m/%d/%H")
+        blob_name = f"tfl_disruptions/{timestamp}/tfl_disruptions.json"
+        blob = bucket.blob(blob_name)
 
-    blob.upload_from_string(
-        ndjson_string,
-        content_type="application/x-ndjson"
-    )
+        ndjson_string = "\n".join(json.dumps(r) for r in cleaned_records)
 
-    print(f"Uploaded to gs://{BUCKET_NAME}/{blob_name}")
+        blob.upload_from_string(
+            ndjson_string,
+            content_type="application/x-ndjson"
+        )
+
+        print(f"Uploaded to gs://{BUCKET_NAME}/{blob_name}", flush=True)
+
+    except Exception as e:
+        print("UPLOAD FAILED:", repr(e), flush=True)
+        raise
 
 
 def main(request=None):
