@@ -31,9 +31,12 @@ def upload_to_gcs(data):
     timestamp = dt.datetime.now(tz=dt.timezone.utc).strftime("%Y/%m/%d/%H")
     blob_name = f"weather_forecast_data/{timestamp}/weather_data.json"
     blob = bucket.blob(blob_name)
+
+    ndjson_string = "\n".join(json.dumps(r) for r in data)
+
     blob.upload_from_string(
-        json.dumps(data, indent=2),
-        content_type="application/json"
+        ndjson_string,
+        content_type="application/x-ndjson"
 )
 
 
