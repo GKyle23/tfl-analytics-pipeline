@@ -1,3 +1,6 @@
+print(">>> MODULE IMPORTED <<<", flush=True)
+
+
 import os
 import json
 import datetime as dt
@@ -66,13 +69,13 @@ def upload_to_gcs(ndjson_string):
     )
 
 
-def main(request):
-    logging.info("Weather ingestion started")
+def main():
+    print(">>> MAIN STARTED <<<", flush=True)
     raw_data = fetch_weather_data()
     ndjson = flatten_to_ndjson(raw_data)
     upload_to_gcs(ndjson)
-    logging.info("Weather ingestion completed")
-    return "OK", 200
+    print(">>> MAIN FINISHED <<<", flush=True)
+    return "Weather data fetched, cleaned, and uploaded to GCS."
 
 if __name__ == "__main__":
     main()
