@@ -2,48 +2,74 @@ import os
 import json
 import datetime as dt
 import requests
+import logging
 from google.cloud import storage
 
-BUCKET_NAME= os.getenv("WEATHER_BUCKET_NAME")
+logging.basicConfig(level=logging.INFO)
 
-    
+BUCKET_NAME = os.getenv("WEATHER_BUCKET_NAME")
+
+
 def fetch_weather_data():
+    logging.info("Fetching weather data")
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": 51.5072,
         "longitude": -0.1276,
-        "hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "relative_humidity_2m"],
+        "hourly": [
+            "temperature_2m",
+            "precipitation",
+            "wind_speed_10m",
+            "relative_humidity_2m"
+        ],
         "past_days": 1,
         "forecast_days": 1,
         "timezone": "UTC"
     }
     resp = requests.get(url, params=params)
     resp.raise_for_status()
-    print("Status:", resp.status_code)
-    data = resp.json()
-    return data
+    logging.info("Weather API status %s", resp.status_code)
+    return resp.json()
 
 
+def flatten_to_ndjson(data):
+    hourly = data["hourly"]
 
-def upload_to_gcs(data):
+    rows = []
+    for i, ts in enumerate(hourly["time"]):
+        rows.append({
+            "time": ts,
+            "temperature_2m": hourly["temperature_2m"][i],
+            "precipitation": hourly["precipitation"][i],
+            "wind_speed_10m": hourly["wind_speed_10m"][i],
+            "relative_humidity_2m": hourly["relative_humidity_2m"][i],
+            "latitude": data["latitude"],
+            "longitude": data["longitude"]
+        })
+
+    return "\n".join(json.dumps(r) for r in rows)
+
+
+def upload_to_gcs(ndjson_string):
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
+
     timestamp = dt.datetime.now(tz=dt.timezone.utc).strftime("%Y/%m/%d/%H")
-    blob_name = f"weather_forecast_data/{timestamp}/weather_data.json"
+    blob_name = f"weather_forecast_data/{timestamp}/weather_data.ndjson"
+
+    logging.info("Uploading to gs://%s/%s", BUCKET_NAME, blob_name)
+
     blob = bucket.blob(blob_name)
-
-    ndjson_string = "\n".join(json.dumps(r) for r in data)
-
     blob.upload_from_string(
         ndjson_string,
         content_type="application/x-ndjson"
-)
+    )
 
 
-def main(request=None):
+def main(request):
+    logging.info("Weather ingestion started")
     raw_data = fetch_weather_data()
-    upload_to_gcs(raw_data)
-    return 'Weather data uploaded'
-
-if __name__ == "__main__":
-    main()
+    ndjson = flatten_to_ndjson(raw_data)
+    upload_to_gcs(ndjson)
+    logging.info("Weather ingestion completed")
+    return "OK", 200
