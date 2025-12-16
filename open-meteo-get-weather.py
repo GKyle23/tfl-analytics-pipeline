@@ -69,7 +69,7 @@ def upload_to_gcs(ndjson_string):
     )
 
 
-def main():
+def main(request=None):
     print(">>> MAIN STARTED <<<", flush=True)
     raw_data = fetch_weather_data()
     ndjson = flatten_to_ndjson(raw_data)
