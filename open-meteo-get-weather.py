@@ -73,3 +73,6 @@ def main(request):
     upload_to_gcs(ndjson)
     logging.info("Weather ingestion completed")
     return "OK", 200
+
+if __name__ == "__main__":
+    main()
