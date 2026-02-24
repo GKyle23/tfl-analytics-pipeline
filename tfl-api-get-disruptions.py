@@ -19,6 +19,7 @@ def fetch_tfl_data():
 
 def clean_record(record):
     cleaned = {}
+    cleaned["fetched_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
     for key, value in record.items():
         if key.startswith("$"):
             clean_key = key.replace("$", "meta_")   # e.g. $type → meta_type

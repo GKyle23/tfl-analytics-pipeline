@@ -39,6 +39,7 @@ def flatten_to_ndjson(data):
     hourly = data["hourly"]
 
     rows = []
+    rows.append('fetched_at: ' + dt.datetime.now(tz=dt.timezone.utc).isoformat())
     for i, ts in enumerate(hourly["time"]):
         rows.append({
             "time": ts,
