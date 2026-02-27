@@ -1,5 +1,3 @@
-print(">>> MODULE IMPORTED <<<", flush=True)
-
 
 import os
 import json
@@ -8,7 +6,6 @@ import requests
 import logging
 from google.cloud import storage
 
-logging.basicConfig(level=logging.INFO)
 
 BUCKET_NAME = os.getenv("WEATHER_BUCKET_NAME")
 
@@ -37,11 +34,12 @@ def fetch_weather_data():
 
 def flatten_to_ndjson(data):
     hourly = data["hourly"]
+    fetched_at = dt.datetime.now(tz=dt.timezone.utc).isoformat()
 
     rows = []
-    rows.append('fetched_at: ' + dt.datetime.now(tz=dt.timezone.utc).isoformat())
     for i, ts in enumerate(hourly["time"]):
         rows.append({
+            "fetched_at": fetched_at,
             "time": ts,
             "temperature_2m": hourly["temperature_2m"][i],
             "precipitation": hourly["precipitation"][i],
@@ -71,11 +69,9 @@ def upload_to_gcs(ndjson_string):
 
 
 def main(request=None):
-    print(">>> MAIN STARTED <<<", flush=True)
     raw_data = fetch_weather_data()
     ndjson = flatten_to_ndjson(raw_data)
     upload_to_gcs(ndjson)
-    print(">>> MAIN FINISHED <<<", flush=True)
     return "Weather data fetched, cleaned, and uploaded to GCS."
 
 if __name__ == "__main__":
