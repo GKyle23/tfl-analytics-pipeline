@@ -17,20 +17,51 @@ def fetch_tfl_data():
     return resp.json()   # returns a list of disruptions
 
 
-def clean_record(record):
-    cleaned = {}
-    cleaned["fetched_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
-    for key, value in record.items():
-        if key.startswith("$"):
-            clean_key = key.replace("$", "meta_")   # e.g. $type → meta_type
-        else:
-            clean_key = key
-        cleaned[clean_key] = value
-    return cleaned
+# Enforced schema
+def clean_record(record, now_iso):
+    return {
+        "meta_type": record.get("$type"),
+
+        "category": record.get("category"),
+        "type": record.get("type"),
+        "description": record.get("description"),
+        "categoryDescription": record.get("categoryDescription"),
+
+        # ALWAYS present 
+        "created": record.get("created"),
+        "lastUpdate": record.get("lastUpdate"),
+
+        "closureText": record.get("closureText"),
+
+        # Arrays always present
+        "affectedRoutes": record.get("affectedRoutes", []),
+        "affectedStops": record.get("affectedStops", []),
+
+        # Optional field (safe)
+        "additionalInfo": record.get("additionalInfo"),
+
+        # Ingestion timestamp
+        "fetched_at": now_iso
+    }
 
 
 def clean_data(records):
-    return [clean_record(r) for r in records]
+    now_iso = dt.datetime.now(dt.timezone.utc).isoformat()
+    cleaned = []
+
+    for r in records:
+        try:
+            row = clean_record(r, now_iso)
+
+            # Ensure JSON serialisable 
+            json.dumps(row)
+
+            cleaned.append(row)
+
+        except Exception as e:
+            print("Skipping bad record:", repr(e), flush=True)
+
+    return cleaned
 
 
 def upload_to_gcs(cleaned_records):
