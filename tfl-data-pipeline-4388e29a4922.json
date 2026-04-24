@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "tfl-data-pipeline",
+  "private_key_id": "4388e29a492216785965c1590b085ab31c3e5bf3",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCZzC138wRK7fTM\nHacpUQTlvee53PUjNcxCrqq5WsIaS6ZgLl/QR0ZPVHq25/iDtVKZT4wbXkkpvvZ3\nlxSDsJmZ/v4ANmq/olR2cULxUGLQoS9VfrzmJPl0vW7p5oiMWhmbuMu9fJN00JZ1\nFa8z4oVrvYeaMtxWQu9CWOy0gORrfPYXWVx8EgYBxZNErCgxtKpUD85vUvhpbYJi\nma715kZ3gcTBOn1DRQr5Yrq/BG1ORy8KitKBMVfXFMi5b6cV7ng8SPKdJKs+Tfmv\nUmN2JvL8Yhw1UaE8psXqNb8VgbKjM/50jndO4rumchaBj20kznPk6EHenzxhQcNn\nE3MeFoldAgMBAAECggEAAy5VbGsy1gfo7cXZPMIHu2a7obz/tvw4XtK1BkNpy1hw\nNwIOikTHIAHrzderbLH15OTfzXscQUhJWbzeuECRVL2Q7FkzyQXnAFIkY9BZUt5a\nl8aYypvOKwt1/VF+1oRQjkd6s08dz6c2zXIm3wha4RkY8mgF5aTZxQII10zpLI3v\nZdCyLC77Mm8JKuhBlLtKntGQc6gkV81yxzTrvtbdxUUCu5RIN+hs0MiUs9ZI9/Dn\n8+saX2vKQ1LDQd3n0eorbubRvIObcsPgy/5UHUueEPCT90H1EUSK1KtHZ5SA2wXM\nwMPs0N+q5b7y5Oh6Vfv/L/raeyQb8EPkFG5Fwp/WMQKBgQDGrRRDX7viK56O6sUK\nis6O3RLSgdAc7cKm3FQtcHD8oqUBQHtcYkeFbt5KlvfK3kZASAq2jpMeRqu39+aP\nCou/tEStSawnbqNnE/JyuCWIrXWie1jjGVAaeMagl21E+WFf3GGBDYB2SqgQKzJd\nu+HG0Jy9+LMydG0HIWUqb3To9QKBgQDGLDYuMPzU6LYPOK2EBDhKF6xiV7oxhPYC\nNig93DfjWWOcA5+4r8PgiEVEWzuaXkZDr4JqOcmgwTnVzqFr7q5LKvSRwGDR7dKB\nQYxNWs9kueLEW3YtzmzXmLI+uEQgsqt5MBR9O+j4spl2Ez91HkMMFJIP2DZvRbjQ\nOwnAJ9x9yQKBgHaUn1+HKFDZ0A1lOq4MIzVJ5g4WxOw/TMri/qsQTZ+8Q9f3cKm3\nTxDpF2xVpxhCipObbCmB93U+oQdwwv/lP3vwUH1NV59Bfe3sDe1C08Q8I9YS4P7L\nAPCL3aHEP8fHQMNCej/Ymy//Z0gfQDSKCzvrD2KjqfEXZGu5FvS5CYJxAoGBAL4G\nAuYD/0xA4OJznJ5sVXVmgdvC9z0om6S/PZMjqUuNmWAucWds0sxontLPELYTFBkv\nIESvqNFGtyh3fH28XtChHebsq2phO2rJ6bj7DMcvH2zdrtJ5kBCj0Lcnhdw8twP7\nwIndeqWOzGxWRJEPNYdN6kjbMEc+edrh4ZWqI1lRAoGAQoJg3QAZuQMmLoN+gE1R\nPmQdUeEg5WvoyBf9EvFUKqPlSXya+GLEIZYrtg8PVPfHPDPUkn16GBJzg+ff7zi6\nKiY+ebEHSm5evjlkdUjS6c1KBMn1gG3wM918ZODp4u0cv0XO8NGMb5poz40g0BNI\njkfBOwGmourcBZ3tjJG8sxU=\n-----END PRIVATE KEY-----\n",
+  "client_email": "tfl-pipeline-sa@tfl-data-pipeline.iam.gserviceaccount.com",
+  "client_id": "102181817667844993411",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/tfl-pipeline-sa%40tfl-data-pipeline.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
