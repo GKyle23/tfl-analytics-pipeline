@@ -1,59 +1,82 @@
-
 # TFL Analytics Pipeline 🚧 *(Work in Progress)*
 
-An end-to-end data pipeline that ingests Transport for London (TfL) disruption data, enriches it with weather data, and models it for analytics use in BigQuery.
+An end-to-end data pipeline that ingests Transport for London (TfL) disruption data and weather data, stores raw API responses in Google Cloud Storage, and prepares analytics-ready datasets in BigQuery.
 
-> ⚠️ **Status:** This project is actively being developed.  
+> ⚠️ **Status:** This project is actively being developed.
 > Expect incomplete features, evolving data models, and ongoing refactoring.
 
 ---
 
 ## Overview
 
-This project demonstrates a modern analytics engineering workflow on Google Cloud Platform (GCP), including ingestion, transformation, enrichment, and modeling.
+This project demonstrates a modern analytics engineering workflow on Google Cloud Platform (GCP), including:
 
-**Core idea:**  
-Combine transport disruption data with weather conditions to enable richer analytical insights (e.g. correlation between weather and service disruptions).
+- API ingestion using Python
+- Raw data archiving in Cloud Storage
+- Incremental data processing in BigQuery
+- Layered data modeling
+- Analytics-ready outputs for reporting and exploration
+
+**Project Goal**
+
+Explore the relationship between transport disruptions and weather conditions by combining TfL disruption data with weather observations and forecasts.
 
 ---
 
 ## Architecture
 
 The pipeline uses the following GCP components:
-- **Cloud Run** – Executes ingestion services (containerised, serverless)
-- **Cloud Scheduler** – Triggers ingestion jobs on a schedule
-- **Cloud Storage** - Stores the raw JSON API data
-- **Big Query** - Stores raw,enriched and summary datasets
-- **Looker** - Visusalising trends and comparisons.
+
+- **Cloud Run** – Executes ingestion services
+- **Cloud Scheduler** – Triggers ingestion jobs
+- **Cloud Storage (GCS)** – Stores raw JSON API responses
+- **BigQuery** – Stores staging, historical, and analytics datasets
+- **Looker** *(planned)* – Visualisation and reporting
 
 ### Data Flow
 
+```text
 TFL API + Weather API
-↓
-GCS (raw JSON)
-↓
-BigQuery (landing/raw)
-↓
-BigQuery (staging / enriched)
-↓
-BigQuery (analytics / marts)
-↓
-Looker dashboards
+          ↓
+Cloud Run
+          ↓
+Cloud Storage (raw JSON archive)
+          ↓
+BigQuery Landing
+          ↓
+BigQuery Staging
+          ↓
+BigQuery Historical Models
+          ↓
+Analytics & Reporting
 
 
 ---
 
 ## Features
 
-- Hourly ingestion of TfL disruption data  
-- Weather enrichment via external API  
-- Raw JSON archiving in GCS (data lake pattern)  
-- Partitioned BigQuery tables for performance and cost efficiency  
-- Incremental processing using merge strategies (idempotent loads)  
-- Airflow DAG orchestration with retry logic  
-- Layered data modeling:
-  - **Landing → Staging → Core → Marts**
-- Initial Looker dashboard for trend exploration  
+### Data Ingestion
+
+- TfL disruption API ingestion
+- Open-Meteo weather API ingestion
+- Raw JSON archival in GCS
+- Timestamped data collection
+
+### Data Processing
+
+- Bootstrap scripts for table creation
+- Incremental MERGE processing
+- Historical disruption tracking
+- Data validation and type casting
+- Idempotent loading patterns
+
+### Analytics Engineering Practices
+
+- Layered data architecture
+- Partitioned BigQuery tables
+- Incremental processing
+- Separation of raw and historical datasets
+- Documentation and runbooks
 
 ---
 
@@ -61,18 +84,28 @@ Looker dashboards
 
 
 ```
-/ingestion/ # Cloud Run ingestion services
+docs/
+├── data_model.md
+├── runbook.md
+└── scaffold.md
 
-/sql/ # BigQuery transformation logic
-├── staging/ # Cleaning + type casting + deduplication
-├── core/ # Business logic models
-└── marts/ # Analytics-ready tables
+ingestion/
+├── open-meteo-get-weather.py
+├── tfl-api-explorer.py
+└── tfl-api-get-disruptions.py
 
-/docs/ # Documentation (data model, runbook, setup)
-/infra/ # Infrastructure/configuration scripts
+sql/
+└── staging/
+    └── tfl/
+        ├── stg_tfl_disruptions_bootstrap.sql
+        ├── stg_tfl_disruptions_raw_bootstrap.sql
+        ├── stg_tfl_disruptions_raw_merge.sql
+        ├── stg_tfl_disruptions_history_bootstrap.sql
+        └── stg_tfl_disruptions_history_insert.sql
+
+README.md
 requirements.txt
 runtime.txt
-README.md
 ```
 
 
@@ -82,10 +115,6 @@ README.md
 
 The pipeline is deployed across **dev**, **staging**, and **production** environments.
 
-Each environment includes:
-- Dedicated Composer environment  
-- Separate GCS bucket  
-- Separate BigQuery datasets  
 
 ### Deployment Model
 
