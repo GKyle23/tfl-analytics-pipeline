@@ -1,3 +1,5 @@
+
+
 CREATE OR REPLACE TABLE `tfl-data-pipeline-stg.landing.stg_tfl__disruptions__raw`
 PARTITION BY DATE(created)
 AS
@@ -30,7 +32,6 @@ SELECT
   -- Metadata
   meta_type,
 
-  -- ✅ ADD THIS
   SAFE_CAST(fetched_at AS TIMESTAMP)  AS fetched_at,
 
   -- Lineage
