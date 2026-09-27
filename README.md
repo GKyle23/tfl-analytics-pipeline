@@ -50,8 +50,7 @@ BigQuery Historical Models
           ↓
 Analytics & Reporting
 
-
----
+```
 
 ## Features
 
