@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `tfl-data-pipeline-stg.landing.stg_tfl__disruptions`
+CREATE OR REPLACE TABLE `tfl-data-pipeline-stg.staging.stg_tfl__disruptions`
 (
   disruption_key STRING,
   created TIMESTAMP,
