@@ -120,10 +120,19 @@ Three GCP projects: `tfl-data-pipeline-dev`, `tfl-data-pipeline-stg`, and `tfl-d
 
 Ingestion runs once, in prod. Dev and staging build their own `staging` / `core` / `marts` datasets by reading prod's `landing` dataset cross-project. This keeps one copy of raw API captures and one set of Cloud Run / Scheduler jobs; the trade-off is that ingestion changes can't be rehearsed in a lower environment before they reach prod.
 
-### Deployment Model
+### Orchestration
 
-- Cloud Run services deployed per environment via `gcloud run deploy` (see [Runbook](docs/runbook.md))
-- SQL executed manually or via BigQuery scheduled queries
+Ingestion is triggered by Cloud Scheduler → Cloud Run (prod). Transformations run as **BigQuery scheduled queries** in each environment, each pointing at the matching file in `sql/`:
+
+| Order | Scheduled query | SQL file | Cadence | Writes |
+|---|---|---|---|---|
+| 1 | Disruptions history insert | `stg_tfl__disruptions__history_insert.sql` | every 30 min (:05, :35) | `staging.stg_tfl__disruptions__history` |
+| 2 | Disruptions merge | `stg_tfl__disruptions_merge.sql` | every 30 min (:12, :42) | `staging.stg_tfl__disruptions` |
+| 3 | Weather hourly rebuild | `stg_weather__hourly_bootstrap.sql` | hourly (:29) | `staging.stg_weather__hourly` |
+| 4 | Core join rebuild | `core_tfl__disruptions__weather.sql` | hourly (:30) | `core.core_tfl__disruptions__weather` |
+
+Landing tables are external tables over the GCS archive, so there is no load step; new files are visible to the next scheduled run. Queries are independent (no DAG); the minute offsets are what keep core downstream of staging. The SQL in `sql/` is the source of truth — update the file, then paste it into the scheduled query.
+
 - `main` → stable; feature branches → development
 
 ---

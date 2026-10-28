@@ -52,7 +52,21 @@ curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
   "$(gcloud run services describe tfl-disruptions-ingest --region $REGION --format 'value(status.url)')"
 ```
 
-## Run transformations
+## Scheduled queries
+
+Transformations run as BigQuery scheduled queries (Data Transfer Service) in `tfl-data-pipeline-stg`, region `us-central1`. See the orchestration table in the README for cadence. To inspect runs:
+
+```sql
+SELECT creation_time, statement_type, destination_table.table_id, state, error_result.message
+FROM `tfl-data-pipeline-stg`.`region-us-central1`.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+WHERE EXISTS (SELECT 1 FROM UNNEST(labels) l WHERE l.key = 'data_source_id')
+  AND creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY)
+ORDER BY creation_time DESC;
+```
+
+To change a transformation: edit the file in `sql/`, open the scheduled query in the BigQuery console → Scheduled queries → Edit, paste the new SQL. There is no automated sync.
+
+## Run transformations manually
 
 Order matters. Run against the target environment's project.
 
@@ -98,6 +112,7 @@ SELECT MAX(fetched_at) FROM `tfl-data-pipeline.landing.tfl-disruptions-raw`;
 
 ## Known gaps
 
-- No landing-table DDL or load job in the repo yet; GCS → `landing` is manual.
+- No landing external-table DDL in the repo yet.
+- Scheduled-query SQL is pasted by hand from `sql/`; nothing enforces that they match.
 - Weather and core are full rebuilds; convert to MERGE when volume warrants.
 - No reject table; uncastable rows are silently dropped at staging.

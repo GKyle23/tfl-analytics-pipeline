@@ -1,5 +1,7 @@
 
-CREATE OR REPLACE TABLE `tfl-data-pipeline-stg.core.core_tfl__disruptions__weather` AS
+CREATE OR REPLACE TABLE `tfl-data-pipeline-stg.core.core_tfl__disruptions__weather`
+PARTITION BY DATE(created)
+AS
 
 WITH disruptions AS (
   SELECT
