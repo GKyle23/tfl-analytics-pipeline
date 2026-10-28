@@ -22,7 +22,7 @@ weather AS (
     wind_speed_10m, 
     relative_humidity_2m
   FROM `tfl-data-pipeline-stg.staging.stg_weather__hourly`
-
+  WHERE NOT is_forecast
 )
 
 SELECT

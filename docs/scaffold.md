@@ -30,7 +30,9 @@ Separate projects per environment for isolation and clarity:
 |------------|------------|--------|
 | **Dev** | `tfl-data-pipeline-dev` | Active development |
 | **Staging** | `tfl-data-pipeline-stg` | Validation / QA |
-| **Prod** | `tfl-data-pipeline-prod` | Production workloads |
+| **Prod** | `tfl-data-pipeline` (display name `tfl-data-pipeline-prod`) | Production workloads |
+
+Ingestion runs once, in prod. Its GCS bucket and `landing` dataset are the single raw source; dev and staging build their own `staging`/`core`/`marts` by reading prod's `landing` cross-project. SQL in this repo targets `-stg`.
 
 ---
 
