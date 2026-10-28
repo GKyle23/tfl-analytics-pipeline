@@ -1,8 +1,12 @@
 
 /*
-This SQL script is to faciliate a merge from the landing raw table into the staging table.
-Note I am creating a unique key here to faciliate idempotence. This approach
-gives an "updated" view in th data as disruptions update over time.
+This SQL script is to facilitate a merge from the landing raw table into the staging table.
+Note I am creating a unique key here to facilitate idempotence. This approach
+gives an "updated" view in the data as disruptions update over time.
+
+Note: the source landing table lives in project `tfl-data-pipeline` while the
+staging target lives in `tfl-data-pipeline-stg` — landing is a single shared
+project; staging/core/marts are per environment. See docs/scaffold.md §2.
 */
 
 
@@ -50,7 +54,8 @@ USING (
 
 ON T.disruption_key = S.disruption_key
 
-WHEN MATCHED AND T.last_update != S.last_update THEN
+-- IS DISTINCT FROM: != is never true when either side is NULL (SAFE_CAST failures)
+WHEN MATCHED AND T.last_update IS DISTINCT FROM S.last_update THEN
   UPDATE SET
     created        = S.created,
     last_update    = S.last_update,

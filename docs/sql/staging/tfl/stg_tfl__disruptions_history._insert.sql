@@ -54,5 +54,5 @@ WHERE NOT EXISTS (
   SELECT 1
   FROM `tfl-data-pipeline-stg.staging.stg_tfl__disruptions__history` h
   WHERE h.disruption_key = s.disruption_key
-    AND h.last_update = s.last_update
+    AND h.last_update IS NOT DISTINCT FROM s.last_update
 );

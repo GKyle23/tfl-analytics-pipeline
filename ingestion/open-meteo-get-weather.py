@@ -7,6 +7,8 @@ import logging
 from google.cloud import storage
 
 
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+
 BUCKET_NAME = os.getenv("WEATHER_BUCKET_NAME")
 
 
@@ -26,7 +28,7 @@ def fetch_weather_data():
         "forecast_days": 1,
         "timezone": "UTC"
     }
-    resp = requests.get(url, params=params)
+    resp = requests.get(url, params=params, timeout=30)
     resp.raise_for_status()
     logging.info("Weather API status %s", resp.status_code)
     return resp.json()

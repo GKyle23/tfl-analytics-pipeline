@@ -12,7 +12,7 @@ def fetch_tfl_data():
     url = f"https://api.tfl.gov.uk/Line/Mode/{MODES}/Disruption"
     params = {"app_key": APP_KEY}
     headers = {"Cache-Control": "no-cache"}
-    resp = requests.get(url, params=params, headers=headers)
+    resp = requests.get(url, params=params, headers=headers, timeout=30)
     resp.raise_for_status()
     return resp.json()   # returns a list of disruptions
 
@@ -70,7 +70,7 @@ def upload_to_gcs(cleaned_records):
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
 
-        timestamp = dt.datetime.now().strftime("%Y/%m/%d/%H")
+        timestamp = dt.datetime.now(tz=dt.timezone.utc).strftime("%Y/%m/%d/%H")
         blob_name = f"tfl_disruptions/{timestamp}/tfl_disruptions.json"
         blob = bucket.blob(blob_name)
 
