@@ -28,12 +28,11 @@ Separate projects per environment for isolation and clarity:
 
 | Environment | Project ID | Purpose |
 |------------|------------|--------|
-| **Landing (shared)** | `tfl-data-pipeline` | Raw API captures in GCS + `landing` dataset; read by every env |
 | **Dev** | `tfl-data-pipeline-dev` | Active development |
 | **Staging** | `tfl-data-pipeline-stg` | Validation / QA |
-| **Prod** | `tfl-data-pipeline-prod` | Production workloads |
+| **Prod** | `tfl-data-pipeline` (display name `tfl-data-pipeline-prod`) | Production workloads |
 
-Landing is captured once into the shared project; `staging`, `core` and `marts` are built per environment from that one source. SQL in this repo targets `-stg`.
+Ingestion runs once, in prod. Its GCS bucket and `landing` dataset are the single raw source; dev and staging build their own `staging`/`core`/`marts` by reading prod's `landing` cross-project. SQL in this repo targets `-stg`.
 
 ---
 
