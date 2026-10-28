@@ -81,49 +81,50 @@ Analytics & Reporting
 
 ## Repository Structure
 
-
 ```
 docs/
-├── data_model.md
-├── runbook.md
-└── scaffold.md
+├── data_model.md       # column dictionary for staging + core tables
+├── runbook.md          # deploy, run, backfill
+└── scaffold.md         # environments, naming, conventions
 
 ingestion/
 ├── open-meteo-get-weather.py
-├── tfl-api-explorer.py
 └── tfl-api-get-disruptions.py
 
+notebooks/
+└── tfl-api-explore.py  # API exploration only; not deployed
+
 sql/
-└── staging/
-    └── tfl/
-        ├── stg_tfl_disruptions_bootstrap.sql
-        ├── stg_tfl_disruptions_raw_bootstrap.sql
-        ├── stg_tfl_disruptions_raw_merge.sql
-        ├── stg_tfl_disruptions_history_bootstrap.sql
-        └── stg_tfl_disruptions_history_insert.sql
+├── staging/
+│   ├── tfl/
+│   │   ├── stg_tfl__disruptions_bootstrap.sql
+│   │   ├── stg_tfl__disruptions_merge.sql
+│   │   ├── stg_tfl__disruptions__history_bootstrap.sql
+│   │   └── stg_tfl__disruptions__history_insert.sql
+│   └── weather/
+│       └── stg_weather__hourly_bootstrap.sql
+└── core/
+    └── core_tfl__disruptions__weather.sql
 
 README.md
-requirements.txt
+requirements.txt        # runtime (Cloud Run)
+requirements-dev.txt    # notebooks / exploration
 runtime.txt
 ```
-
 
 ---
 
 ## Environments
 
-The pipeline is deployed across **dev**, **staging**, and **production** environments.
+Three GCP projects: `tfl-data-pipeline-dev`, `tfl-data-pipeline-stg`, and `tfl-data-pipeline` (prod).
 
+Ingestion runs once, in prod. Dev and staging build their own `staging` / `core` / `marts` datasets by reading prod's `landing` dataset cross-project. This keeps one copy of raw API captures and one set of Cloud Run / Scheduler jobs; the trade-off is that ingestion changes can't be rehearsed in a lower environment before they reach prod.
 
 ### Deployment Model
 
-Branch-based deployment:
-
-- `dev` → Development environment  
-- `staging` → Staging environment  
-- `main` → Production environment  
-
-Cloud Build syncs DAGs to Composer based on branch.
+- Cloud Run services deployed per environment via `gcloud run deploy` (see [Runbook](docs/runbook.md))
+- SQL executed manually or via BigQuery scheduled queries
+- `main` → stable; feature branches → development
 
 ---
 
