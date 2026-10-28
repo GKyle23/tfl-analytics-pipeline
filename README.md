@@ -81,49 +81,59 @@ Analytics & Reporting
 
 ## Repository Structure
 
-
 ```
 docs/
-├── data_model.md
-├── runbook.md
-└── scaffold.md
+├── data_model.md       # column dictionary for staging + core tables
+├── runbook.md          # deploy, run, backfill
+└── scaffold.md         # environments, naming, conventions
 
 ingestion/
 ├── open-meteo-get-weather.py
-├── tfl-api-explorer.py
 └── tfl-api-get-disruptions.py
 
+notebooks/
+└── tfl-api-explore.py  # API exploration only; not deployed
+
 sql/
-└── staging/
-    └── tfl/
-        ├── stg_tfl_disruptions_bootstrap.sql
-        ├── stg_tfl_disruptions_raw_bootstrap.sql
-        ├── stg_tfl_disruptions_raw_merge.sql
-        ├── stg_tfl_disruptions_history_bootstrap.sql
-        └── stg_tfl_disruptions_history_insert.sql
+├── staging/
+│   ├── tfl/
+│   │   ├── stg_tfl__disruptions_bootstrap.sql
+│   │   ├── stg_tfl__disruptions_merge.sql
+│   │   ├── stg_tfl__disruptions__history_bootstrap.sql
+│   │   └── stg_tfl__disruptions__history_insert.sql
+│   └── weather/
+│       └── stg_weather__hourly_bootstrap.sql
+└── core/
+    └── core_tfl__disruptions__weather.sql
 
 README.md
-requirements.txt
+requirements.txt        # runtime (Cloud Run)
+requirements-dev.txt    # notebooks / exploration
 runtime.txt
 ```
-
 
 ---
 
 ## Environments
 
-The pipeline is deployed across **dev**, **staging**, and **production** environments.
+Three GCP projects: `tfl-data-pipeline-dev`, `tfl-data-pipeline-stg`, and `tfl-data-pipeline` (prod).
 
+Ingestion runs once, in prod. Dev and staging build their own `staging` / `core` / `marts` datasets by reading prod's `landing` dataset cross-project. This keeps one copy of raw API captures and one set of Cloud Run / Scheduler jobs; the trade-off is that ingestion changes can't be rehearsed in a lower environment before they reach prod.
 
-### Deployment Model
+### Orchestration
 
-Branch-based deployment:
+Ingestion is triggered by Cloud Scheduler → Cloud Run (prod). Transformations run as **BigQuery scheduled queries** in each environment, each pointing at the matching file in `sql/`:
 
-- `dev` → Development environment  
-- `staging` → Staging environment  
-- `main` → Production environment  
+| Order | Scheduled query | SQL file | Cadence | Writes |
+|---|---|---|---|---|
+| 1 | Disruptions history insert | `stg_tfl__disruptions__history_insert.sql` | every 30 min (:05, :35) | `staging.stg_tfl__disruptions__history` |
+| 2 | Disruptions merge | `stg_tfl__disruptions_merge.sql` | every 30 min (:12, :42) | `staging.stg_tfl__disruptions` |
+| 3 | Weather hourly rebuild | `stg_weather__hourly_bootstrap.sql` | hourly (:29) | `staging.stg_weather__hourly` |
+| 4 | Core join rebuild | `core_tfl__disruptions__weather.sql` | hourly (:30) | `core.core_tfl__disruptions__weather` |
 
-Cloud Build syncs DAGs to Composer based on branch.
+Landing tables are external tables over the GCS archive, so there is no load step; new files are visible to the next scheduled run. Queries are independent (no DAG); the minute offsets are what keep core downstream of staging. The SQL in `sql/` is the source of truth — update the file, then paste it into the scheduled query.
+
+- `main` → stable; feature branches → development
 
 ---
 

@@ -93,30 +93,30 @@ A layered ELT architecture aligned to analytics engineering best practice:
 
 ### Example Table Flow
 
-**Landing**
-- `landing.tfl_disruptions_raw`
-- `landing.weather_raw`
+**Landing** (prod project only)
+- `landing.tfl-disruptions-raw`
+- `landing.weather-raw`
 
 **Staging**
-- `staging.tfl_disruptions_stg`
-- Deduplication via hashed `disruption_key`
-- Reject handling for bad records
+- `staging.stg_tfl__disruptions` — current state, one row per `disruption_key`, upserted via MERGE
+- `staging.stg_tfl__disruptions__history` — one row per `(disruption_key, last_update)`; append-only change log
+- `staging.stg_weather__hourly` — one row per hour, observations preferred over forecasts
+- Reject handling for bad records *(planned)*
 
 **Core**
-- Joined/enriched datasets (TFL + weather)
+- `core.core_tfl__disruptions__weather` — disruptions joined to observed weather on created hour
 
 **Marts**
-- Aggregated metrics for reporting
+- Aggregated metrics for reporting *(planned)*
 
 ---
 
 ## 6. Table Design Conventions
 
 ### Partitioning
-- Partition on **`DATE(created)`**
-- Chosen over ingestion time (`fetched_at`) because:
-  - Aligns with event time
-  - Better for analytical queries
+- Current-state tables partition on **`DATE(created)`** (event time; better for analytical queries than `fetched_at`)
+- History table partitions on **`DATE(fetched_at)`** and clusters on `disruption_key`: it is append-only and queried by load window, and a single disruption spans many `fetched_at` days
+- Weather partitions on `DATE(weather_hour)`
 
 ### Keys
 - Stable primary key via SHA256 hash:
@@ -127,11 +127,8 @@ A layered ELT architecture aligned to analytics engineering best practice:
 - `stg_loaded_at` → transformation timestamp  
 
 ### Data Quality
-- `SAFE_CAST` used extensively
-- Reject tables store:
-  - invalid rows
-  - `reject_reason`
-  - `rejected_at`
+- `SAFE_CAST` used extensively; rows with an uncastable `created` are dropped at staging
+- Reject tables *(planned)* will store invalid rows with `reject_reason` and `rejected_at`
 
 ---
 
@@ -140,20 +137,13 @@ A layered ELT architecture aligned to analytics engineering best practice:
 ```
 tfl-analytics-pipeline/
 │
-├── ingestion/
-│ ├── tfl/
-│ ├── weather/
-│ └── utils/
-│
+├── ingestion/        # one script per source, deployed to Cloud Run
 ├── sql/
-│ ├── landing/
 │ ├── staging/
 │ ├── core/
-│ └── marts/
-│
-├── notebooks/ # exploration / QA only
-├── README.md
-└── scaffold.md
+│ └── marts/        # planned
+├── notebooks/        # exploration / QA only
+└── docs/
 ```
 
 
@@ -169,13 +159,16 @@ tfl-analytics-pipeline/
 ### Tables
 
 ```
-<project>.<dataset>.<layer>_<entity>__<layer>__<purpose>
+<project>.<dataset>.<layer>_<source>__<entity>[__<variant>]
 
 
 **Examples:**
 
 tfl-data-pipeline-stg.staging.stg_tfl__disruptions
-tfl-data-pipeline-stg.landing.stg_tfl__disruptions__raw
+tfl-data-pipeline-stg.staging.stg_tfl__disruptions__history
+tfl-data-pipeline-stg.core.core_tfl__disruptions__weather
+
+SQL files follow the table name plus an action suffix: `_bootstrap`, `_merge`, `_insert`.
 
 
 ```
@@ -213,5 +206,5 @@ cloud-run@tfl-data-pipeline-<env>.iam.gserviceaccount.com
 
 ## 11. References
 
-- Runbook *(TBD)*
-- Data model dictionary *(TBD)*
+- [Runbook](runbook.md)
+- [Data model dictionary](data_model.md)
