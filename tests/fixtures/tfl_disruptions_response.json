@@ -1,0 +1,42 @@
+[
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "RealTime",
+    "type": "lineInfo",
+    "categoryDescription": "RealTime",
+    "description": "ORDNANCE ROAD: Until 23:00 Thursday 31 December 2026, route 276 towards Newham Hospital is on diversion via Manor Road and Barking Road due to signal works at Ordnance Road. Buses are not serving the stops 'Star Lane Station/Star Primary School,' 'Exning Road' and 'Malmesbury Terrace.'",
+    "created": "2025-03-11T15:01:00Z",
+    "lastUpdate": "2025-03-11T17:08:00Z",
+    "affectedRoutes": [],
+    "affectedStops": []
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "stopInfo",
+    "categoryDescription": "Information",
+    "description": "WILLESDEN JUNCTION STATION, routes 18 N18 and N118: If travelling towards Willesden Junction Station and you require step-free interchange from Routes 18 N18 and N118 to trains, please stay at stop H and catch the next 220 bus which operates to the station forecourt. Access from stop H to the station is via stairs and a long footpath. To join these routes step-free, please use Routes 266 and N266 from stop L opposite the station driveway and change at St Mary's Road stop Z",
+    "created": "2026-08-04T11:52:00Z",
+    "lastUpdate": "2026-08-04T12:02:00Z",
+    "affectedRoutes": [],
+    "affectedStops": []
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "RealTime",
+    "type": "routeInfo",
+    "categoryDescription": "RealTime",
+    "description": "District Line: Minor delays between Earl's Court and Upminster eastbound only while we fix a power supply failure at Tower Hill. GOOD SERVICE on the rest of the line.  ",
+    "affectedRoutes": [],
+    "affectedStops": []
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "RealTime",
+    "type": "lineInfo",
+    "categoryDescription": "RealTime",
+    "description": "Circle Line: Severe delays anticlockwise while we fix a points failure at Tower Hill. GOOD SERVICE Clockwise. ",
+    "affectedRoutes": [],
+    "affectedStops": []
+  }
+]
