@@ -1,7 +1,7 @@
 import os
 import json
 import datetime as dt
-import requests
+import http_client
 from google.cloud import storage
 
 APP_KEY= os.getenv("TFL_APP_KEY")
@@ -12,8 +12,7 @@ def fetch_tfl_data():
     url = f"https://api.tfl.gov.uk/Line/Mode/{MODES}/Disruption"
     params = {"app_key": APP_KEY}
     headers = {"Cache-Control": "no-cache"}
-    resp = requests.get(url, params=params, headers=headers, timeout=30)
-    resp.raise_for_status()
+    resp = http_client.get(url, params=params, headers=headers)
     return resp.json()   # returns a list of disruptions
 
 

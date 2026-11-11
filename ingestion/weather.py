@@ -2,7 +2,7 @@
 import os
 import json
 import datetime as dt
-import requests
+import http_client
 import logging
 from google.cloud import storage
 
@@ -28,8 +28,7 @@ def fetch_weather_data():
         "forecast_days": 1,
         "timezone": "UTC"
     }
-    resp = requests.get(url, params=params, timeout=30)
-    resp.raise_for_status()
+    resp = http_client.get(url, params=params)
     logging.info("Weather API status %s", resp.status_code)
     return resp.json()
 
