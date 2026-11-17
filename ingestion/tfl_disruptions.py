@@ -1,3 +1,4 @@
+import argparse
 import os
 import json
 import datetime as dt
@@ -7,7 +8,6 @@ from google.cloud import storage
 APP_KEY= os.getenv("TFL_APP_KEY")
 BUCKET_NAME= os.getenv("TFL_BUCKET_NAME")
 MODES = "tube,dlr,overground,elizabeth-line,tram,bus"
-
 def fetch_tfl_data():
     url = f"https://api.tfl.gov.uk/Line/Mode/{MODES}/Disruption"
     params = {"app_key": APP_KEY}
@@ -87,15 +87,25 @@ def upload_to_gcs(cleaned_records):
         raise
 
 
-def main(request=None):
+def main(request=None, dry_run=False):
     raw_data = fetch_tfl_data()
     cleaned = clean_data(raw_data)
+    if dry_run:
+        print(f"Would upload {len(cleaned)} rows")
+        return "Dry run: nothing uploaded."
     upload_to_gcs(cleaned)
     return "TFL Disruptions data fetched, cleaned, and uploaded to GCS."
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Fetch TfL disruptions and upload to GCS.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Fetch and clean the data, but print the upload instead of doing it.",
+    )
+    args = parser.parse_args()
+    main(dry_run=args.dry_run)
 
 
 

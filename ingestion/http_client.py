@@ -85,13 +85,13 @@ def _redact(text):
 
 
 def _parse_retry_after(value):
-    if not value:
-        return None
     """Retry-After is either a number of seconds ("2") or an HTTP date.
 
     Returns seconds to wait (clamped to 0..MAX_RETRY_AFTER_SECONDS), or None
     if the header is missing or unparseable.
     """
+    if not value:
+        return None
     value = value.strip()
     try:
         seconds = float(value)  # form 1: "Retry-After: 2"
