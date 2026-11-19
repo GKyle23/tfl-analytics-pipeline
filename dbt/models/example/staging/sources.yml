@@ -1,0 +1,24 @@
+version: 2
+
+sources:
+  - name: landing 
+    description: Raw APO data landed from TFL API
+    database: tfl-data-pipeline
+    schema: landing
+    config:
+      loaded_at_field: fetched_at
+      freshness:
+        warn_after: {count:2, period:hour}
+        error_after: {count:6, period:hour}
+        filter: fetched_at >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY)
+
+    tables: 
+      - name: tfl_disruptions_raw
+        identifier: tfl-disruptions-raw # the name in BQ
+        description: One row per disruption per fetch. The same disruption appears on every fetch until TfL closes it.
+
+      - name: weather_raw
+        identifier: weather-raw # the name in BQ
+        description: Hourly weather rows per fetch, including past and forecast hours, so the same hour appears many times.    
+
+
