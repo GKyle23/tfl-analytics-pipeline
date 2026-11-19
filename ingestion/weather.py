@@ -1,8 +1,9 @@
 
+import argparse
 import os
 import json
 import datetime as dt
-import requests
+import http_client
 import logging
 from google.cloud import storage
 
@@ -10,7 +11,6 @@ from google.cloud import storage
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
 BUCKET_NAME = os.getenv("WEATHER_BUCKET_NAME")
-
 
 def fetch_weather_data():
     logging.info("Fetching weather data")
@@ -28,8 +28,7 @@ def fetch_weather_data():
         "forecast_days": 1,
         "timezone": "UTC"
     }
-    resp = requests.get(url, params=params, timeout=30)
-    resp.raise_for_status()
+    resp = http_client.get(url, params=params)
     logging.info("Weather API status %s", resp.status_code)
     return resp.json()
 
@@ -70,11 +69,21 @@ def upload_to_gcs(ndjson_string):
     )
 
 
-def main(request=None):
+def main(request=None, dry_run=False):
     raw_data = fetch_weather_data()
     ndjson = flatten_to_ndjson(raw_data)
+    if dry_run:
+        print(f"Would upload {len(ndjson.splitlines())} rows")
+        return "Dry run: nothing uploaded."
     upload_to_gcs(ndjson)
     return "Weather data fetched, cleaned, and uploaded to GCS."
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Fetch weather data and upload to GCS.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Fetch and flatten the data, but log the upload instead of doing it.",
+    )
+    args = parser.parse_args()
+    main(dry_run=args.dry_run)
