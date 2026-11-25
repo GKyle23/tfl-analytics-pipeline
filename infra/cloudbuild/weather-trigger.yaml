@@ -1,0 +1,82 @@
+# Cloud Build trigger for the weather ingestion service (project tfl-data-pipeline, region europe-west2).
+# Export of the live trigger. Apply changes with:
+#   gcloud builds triggers import --project tfl-data-pipeline --region europe-west2 --source infra/cloudbuild/weather-trigger.yaml
+# Keep _SERVICE_NAME unique per trigger: two triggers sharing a service overwrite each other.
+build:
+  images:
+  - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+  options:
+    logging: CLOUD_LOGGING_ONLY
+    substitutionOption: ALLOW_LOOSE
+  steps:
+  - args:
+    - build
+    - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    - --builder=gcr.io/buildpacks/builder:latest
+    - --network=cloudbuild
+    - --path=.
+    - --env=GOOGLE_FUNCTION_TARGET
+    - --env=GOOGLE_FUNCTION_SOURCE
+    entrypoint: pack
+    env:
+    - GOOGLE_FUNCTION_TARGET=$_FUNCTION_TARGET
+    - GOOGLE_FUNCTION_SOURCE=ingestion/weather.py
+    id: Buildpack
+    name: gcr.io/k8s-skaffold/pack
+  - args:
+    - push
+    - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    id: Push
+    name: gcr.io/cloud-builders/docker
+  - args:
+    - run
+    - services
+    - update
+    - $_SERVICE_NAME
+    - --platform=managed
+    - --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    - --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+    - --region=$_DEPLOY_REGION
+    - --quiet
+    entrypoint: gcloud
+    id: Deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+  substitutions:
+    _AR_HOSTNAME: europe-west1-docker.pkg.dev
+    _AR_PROJECT_ID: tfl-data-pipeline
+    _AR_REPOSITORY: cloud-run-source-deploy
+    _DEPLOY_REGION: europe-west1
+    _FUNCTION_TARGET: main
+    _PLATFORM: managed
+    _SERVICE_NAME: weather-ingest
+    _TRIGGER_ID: e6f12d79-b42e-4d3b-9148-657558d662f7
+  tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - tfl-analytics-pipeline
+description: Build and deploy to Cloud Run service weather-ingest on push to "^main$"
+github:
+  name: tfl-analytics-pipeline
+  owner: GKyle23
+  push:
+    branch: ^main$
+id: 60d94080-ccb7-4b91-8db8-75a5fce57bbd
+name: rmgpgab-tfl-analytics-pipeline-europe-west1-GKyle23-weather
+serviceAccount: projects/tfl-data-pipeline/serviceAccounts/976003765037-compute@developer.gserviceaccount.com
+substitutions:
+  _AR_HOSTNAME: europe-west1-docker.pkg.dev
+  _AR_PROJECT_ID: tfl-data-pipeline
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _DEPLOY_REGION: europe-west1
+  _FUNCTION_TARGET: main
+  _PLATFORM: managed
+  _SERVICE_NAME: weather-ingest
+  _TRIGGER_ID: e6f12d79-b42e-4d3b-9148-657558d662f7
+tags:
+- gcp-cloud-build-deploy-cloud-run
+- gcp-cloud-build-deploy-cloud-run-managed
+- tfl-analytics-pipeline
+includedFiles:
+- ingestion/**
+- requirements.txt
+- runtime.txt
