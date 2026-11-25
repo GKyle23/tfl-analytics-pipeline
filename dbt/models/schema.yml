@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: stg_tfl__disruptions_merge
+    description: >
+      Current-state staging table of TfL disruptions, one row per
+      disruption_key, upserted incrementally from the landing raw table.
+    columns:
+      - name: disruption_key
+        description: "SHA256 of created | description | type; the merge unique key."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: created
+        description: "When the disruption was created (partition column)."
+        data_tests:
+          - not_null
+
+      - name: last_update
+        description: "When the disruption was last updated by TfL."
+
+      - name: description
+        description: "Lower-cased, trimmed disruption description."
+        data_tests:
+          - not_null
+
+      - name: type
+        description: "Lower-cased, trimmed disruption type."
+        data_tests:
+          - not_null
+
+      - name: fetched_at
+        description: "When the ingestion script fetched this record."
+        data_tests:
+          - not_null
+
+      - name: stg_loaded_at
+        description: "Timestamp of the dbt run that loaded this row."
+        data_tests:
+          - not_null
+  
